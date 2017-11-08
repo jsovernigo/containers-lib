@@ -78,6 +78,7 @@ int main(int argc, char** argv)
 		}
 
 		puts(" done");
+		free(val);
 		free(keys[i]);
 	}
 

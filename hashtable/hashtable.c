@@ -42,7 +42,7 @@ struct __key_pair* __create_key_pair(char* key, void* obj)
 		return NULL;
 	}
 
-	new_pair->key = malloc(sizeof(char) * (strlen(key) - 1));
+	new_pair->key = malloc(sizeof(char) * (strlen(key) + 1));
 	strcpy(new_pair->key, key);
 
 	new_pair->obj = obj;
@@ -127,9 +127,12 @@ void destroy_hashtable(struct hashtable* table, void (*destroy)(void*))
 		{
 			struct __key_pair* current_pair;
 
-			while((current_pair = ((struct __key_pair*) remove_front(bucket))) != NULL)
+			current_pair = (struct __key_pair*) remove_front(bucket);
+
+			while (current_pair != NULL)
 			{
 				__destroy_key_pair(current_pair, destroy);
+				current_pair = (struct __key_pair*) remove_front(bucket);
 			}
 			destroy_list(bucket, &free);
 		}
@@ -283,9 +286,15 @@ void* unput_entry(struct hashtable* table, char* key)
 		if (current_pair != NULL && strcmp(key, current_pair->key) == 0)
 		{
 			int result;
+			void* data;
 			result = remove_entry(list, current_pair);
 
-			return current_pair->obj;
+			/* FIXME this is kinda janky */
+			free(current_pair->key);
+			data = current_pair->obj;
+			free(current_pair);
+
+			return data;
 		}
 	}
 
