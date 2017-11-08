@@ -119,7 +119,7 @@ int put_entry(struct hashtable* table, char* key, void* data)
 
 	if (table->table[index] == NULL)
 	{
-		table->table[index] = makeList();
+		table->table[index] = make_list();
 	}
 
 	append(table->table[index], entry);
@@ -151,7 +151,7 @@ void* get_entry(struct hashtable* table, char* key)
 
 	list = table->table[index];
 
-	for (i = 0; i < getLength(list); i++)
+	for (i = 0; i < get_length(list); i++)
 	{
 		struct __key_pair* pair;
 

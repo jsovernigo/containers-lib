@@ -8,12 +8,12 @@ struct linkedlist;
 /**
  *
  */
-struct linkedlist* makeList();
+struct linkedlist* make_list();
 
 /**
  *
  */
-void destroyList(struct linkedlist* list, void (*destroy)(void*));
+void destroy_list(struct linkedlist* list, void (*destroy)(void*));
 
 
 int push(struct linkedlist* list, void* data);
@@ -22,11 +22,11 @@ int append(struct linkedlist* list, void* data);
 
 int insert(struct linkedlist* list, void* data, int (*compare)(void*, void*), int index);
 
-int removeEntry(struct linkedlist* list, void* data);
+int remove_entry(struct linkedlist* list, void* data);
 
 void* get(struct linkedlist* list, int index);
 
-size_t getLength(struct linkedlist* list);
+size_t get_length(struct linkedlist* list);
 
 #endif
 
