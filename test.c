@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TESTS 100
+#define TESTS 100000
 
 int* ip(int i)
 {
@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 
 	struct hashtable* table;
 
-	table = create_hashtable(256, &djb2_hash);
+	table = create_hashtable(TESTS*2, &djb2_hash);
 
 	values = malloc(sizeof(int*) * TESTS);
 	keys = malloc(sizeof(char*) * TESTS);
