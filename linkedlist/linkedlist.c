@@ -236,6 +236,30 @@ int insert(struct linkedlist* list, void* data, int (*compare)(void*, void*), in
 	return 0;
 }
 
+void* remove_front(struct linkedlist* list)
+{
+	void* data;
+	struct __node* front;
+	if (list == NULL)
+	{
+		return NULL;
+	}
+
+	if (list->first == NULL)
+	{
+		return NULL;
+	}
+
+	front = list->first;
+
+	list->first = front->next;
+
+	data = front->data;
+	free(front);
+
+	return data;
+}
+
 int remove_entry(struct linkedlist* list, void* data)
 {
 	struct __node* current;

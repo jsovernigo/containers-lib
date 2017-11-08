@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TESTS 100000
+#define TESTS 100
 
 int* ip(int i)
 {
@@ -60,6 +60,31 @@ int main(int argc, char** argv)
 		}
 		puts(" done");
 	}
+	
+	for (i = 0; i < TESTS; i++)
+	{
+		int* val;
+
+		val = ((int*) unput_entry(table, keys[i]));
+		printf("Unputting %s, %d... ", keys[i], *((int*)values[i]));
+
+		if (val != NULL)
+		{
+			printf("unput");
+		}
+		else
+		{
+			printf("(HASH MISS)");
+		}
+
+		puts(" done");
+		free(keys[i]);
+	}
+
+	free(values);
+	free(keys);
+
+	destroy_hashtable(table, &free);
 
 	return 0;
 }

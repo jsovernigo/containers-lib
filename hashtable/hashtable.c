@@ -42,7 +42,9 @@ struct __key_pair* __create_key_pair(char* key, void* obj)
 		return NULL;
 	}
 
-	new_pair->key = key;
+	new_pair->key = malloc(sizeof(char) * (strlen(key) - 1));
+	strcpy(new_pair->key, key);
+
 	new_pair->obj = obj;
 
 	return new_pair;
@@ -52,7 +54,6 @@ struct hashtable* create_hashtable(size_t size, uint64_t (*hash)(char* key))
 {
 	int i;
 	struct hashtable* table;
-
 
 	if (size <= 0)
 	{
@@ -83,6 +84,63 @@ struct hashtable* create_hashtable(size_t size, uint64_t (*hash)(char* key))
 	return table;
 }
 
+void __destroy_key_pair(struct __key_pair* pair, void (*destroy)(void*))
+{
+	if (pair == NULL)
+	{
+		return;
+	}
+
+	if (destroy == NULL)
+	{
+		destroy = &free;
+	}
+
+	destroy(pair->obj);
+	free(pair->key);
+	free(pair);
+
+	return;
+}
+
+void destroy_hashtable(struct hashtable* table, void (*destroy)(void*))
+{
+	int i;
+
+	if (table == NULL)
+	{
+		return;
+	}
+
+	if (destroy == NULL)
+	{
+		destroy = &free;
+	}
+
+	for (i = 0; i < table->size; i ++)
+	{
+		struct linkedlist * bucket;
+
+		bucket = table->buckets[i];
+
+		if (bucket != NULL)
+		{
+			struct __key_pair* current_pair;
+
+			while((current_pair = ((struct __key_pair*) remove_front(bucket))) != NULL)
+			{
+				__destroy_key_pair(current_pair, destroy);
+			}
+			destroy_list(bucket, &free);
+		}
+	}
+
+	free(table->buckets);
+	free(table);
+
+	return;
+}
+
 uint64_t djb2_hash(char* key)
 {
 	char c;
@@ -111,8 +169,7 @@ void* put_entry(struct hashtable* table, char* key, void* data)
 	{
 		return NULL;
 	}
-	
-	entry = __create_key_pair(key, data);
+
 
 	index = -1;
 	index = table->hash(key) % table->size;
@@ -148,6 +205,7 @@ void* put_entry(struct hashtable* table, char* key, void* data)
 	}
 
 	/* if the above loop runs without finding anything, or it was an empty list */
+	entry = __create_key_pair(key, data);
 	append(table->buckets[index], entry);
 
 	return NULL;

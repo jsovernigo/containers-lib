@@ -22,6 +22,8 @@ int append(struct linkedlist* list, void* data);
 
 int insert(struct linkedlist* list, void* data, int (*compare)(void*, void*), int index);
 
+void* remove_front(struct linkedlist* list);
+
 int remove_entry(struct linkedlist* list, void* data);
 
 void* get(struct linkedlist* list, int index);
