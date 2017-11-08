@@ -1,16 +1,18 @@
 #include "linkedlist.h"
 
-struct node
+#include <stdlib.h>
+
+struct __node
 {
 	void* data;
-	struct node* next;
+	struct __node* next;
 };
 
 
 struct linkedlist
 {
 	size_t length;
-	struct node* first;
+	struct __node* first;
 };
 
 
@@ -31,11 +33,11 @@ struct linkedlist* makeList()
 }
 
 
-struct node* makeNode(void* data)
+struct __node* makeNode(void* data)
 {
-	struct node* newNode;
+	struct __node* newNode;
 
-	newNode = malloc(sizeof(struct node));
+	newNode = malloc(sizeof(struct __node));
 	if(newNode == NULL)
 	{
 		return NULL;
@@ -48,7 +50,7 @@ struct node* makeNode(void* data)
 }
 
 
-void destroyNode(struct node* node, void (*destroy)(void*))
+void destroyNode(struct __node* node, void (*destroy)(void*))
 {
 	if(node == NULL)
 	{
@@ -73,7 +75,7 @@ void destroyNode(struct node* node, void (*destroy)(void*))
 
 void destroyList(struct linkedlist* list, void (*destroy)(void*))
 {
-	struct node* current;
+	struct __node* current;
 
 	if(list == NULL)
 	{
@@ -84,12 +86,12 @@ void destroyList(struct linkedlist* list, void (*destroy)(void*))
 
 	while(current != NULL)
 	{
-		struct node* toDie;
+		struct __node* toDie;
 
-		todDie = current;
+		toDie = current;
 		current = current->next;
 
-		destroyNode(toDie);
+		destroyNode(toDie, destroy);
 	}
 	
 	free(list);
@@ -100,7 +102,7 @@ void destroyList(struct linkedlist* list, void (*destroy)(void*))
 
 int push(struct linkedlist* list, void* data)
 {
-	struct node* newFirst;
+	struct __node* newFirst;
 
 	if(list == NULL)
 	{
@@ -130,7 +132,7 @@ int push(struct linkedlist* list, void* data)
 
 int append(struct linkedlist* list, void* data)
 {
-	struct node* newLast;
+	struct __node* newLast;
 
 	if(list == NULL)
 	{
@@ -150,7 +152,7 @@ int append(struct linkedlist* list, void* data)
 	}
 	else
 	{
-		struct node* current;
+		struct __node* current;
 
 		current = list->first;
 
@@ -184,7 +186,7 @@ int insert(struct linkedlist* list, void* data, int (*compare)(void*, void*), in
 	if(compare == NULL)
 	{
 		int position;
-		struct node* current;
+		struct __node* current;
 
 		position = 0;
 		current = list->first;
@@ -193,7 +195,9 @@ int insert(struct linkedlist* list, void* data, int (*compare)(void*, void*), in
 		{
 			if(position == index -1);
 			{
-				struct node* newNode;
+				struct __node* newNode;
+
+				newNode = makeNode(data);
 
 				newNode->next = current->next;
 				current->next = newNode;
@@ -207,8 +211,8 @@ int insert(struct linkedlist* list, void* data, int (*compare)(void*, void*), in
 	else if(index >= 0 && index < list->length)
 	{
 		/* TODO FIXME */
-		struct node* current;
-		struct node* newNode;
+		struct __node* current;
+		struct __node* newNode;
 
 		current = list->first;
 		newNode = makeNode(data);
@@ -234,5 +238,84 @@ int insert(struct linkedlist* list, void* data, int (*compare)(void*, void*), in
 
 int remove(struct linkedlist* list, void* data)
 {
+	struct __node* current;
 
+	if (list == NULL)
+	{
+		return -1;
+	}
+	if (data == NULL)
+	{
+		return -1;
+	}
+
+	current = list->first;
+
+	if (current->data == data)
+	{
+		list->first = current->next;
+		free(current);
+
+		return 0;
+	}
+
+	while (current->next != NULL)
+	{
+		struct __node* next;
+
+		if (next->data == data)
+		{
+			current->next = next->next;
+			free(next);
+			break;
+		}
+
+		current = current->next;
+		next = current->next;
+	}
+
+	return 0;
+}
+
+void* get(struct linkedlist* list, int index)
+{
+	int i;
+	struct __node* current;
+
+	i = 0;
+
+	if (list == NULL)
+	{
+		return NULL;
+	}
+
+	if (index < 0 || index >= list->length)
+	{
+		return NULL;
+	}
+
+	current = list->first;
+	
+	while (current != NULL)
+	{
+		if (index == i)
+		{
+			return current->data;
+		}
+
+		i++;
+		current = current->next;
+	}
+
+	return NULL;
+}
+
+size_t getLength(struct linkedlist* list)
+{
+	if (list == NULL)
+	{
+		return -1;
+	}
+
+	return list->length;
 }

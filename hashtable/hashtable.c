@@ -3,11 +3,12 @@
 
 #include <stdlib.h>
 #include <stddef.h>
+#include <string.h>
 #include <inttypes.h>
 
 struct __key_pair
 {
-	uint8_t* key;
+	char* key;
 	void* obj;
 };
 
@@ -16,10 +17,10 @@ struct hashtable
 	size_t size;
 	struct linkedlist ** table;
 
-	uint64_t (*hash)(uint8_t* key);
+	uint64_t (*hash)(char* key);
 };
 
-struct __key_pair* __create_key_pair(uint8_t* key, void* obj)
+struct __key_pair* __create_key_pair(char* key, void* obj)
 {
 	struct __key_pair* new_pair;
 
@@ -34,7 +35,7 @@ struct __key_pair* __create_key_pair(uint8_t* key, void* obj)
 	}
 
 	/* create the new pair */
-	new_pair = malloc(sizeof(__key_pair));
+	new_pair = malloc(sizeof(struct __key_pair));
 	if (new_pair == NULL)
 	{
 		return NULL;
@@ -46,9 +47,11 @@ struct __key_pair* __create_key_pair(uint8_t* key, void* obj)
 	return new_pair;
 }
 
-struct hashtable* create_hashtable(size_t size, uint64_t (*hash)(uint8_t* key))
+struct hashtable* create_hashtable(size_t size, uint64_t (*hash)(char* key))
 {
+	int i;
 	struct hashtable* table;
+
 
 	if (size <= 0)
 	{
@@ -59,42 +62,34 @@ struct hashtable* create_hashtable(size_t size, uint64_t (*hash)(uint8_t* key))
 		hash = &djb2_hash;
 	}
 
-	table = malloc(sizeof(table));
+	table = malloc(sizeof(struct hashtable));
 	if (table == NULL)
 	{
 		return NULL;
 	}
 
 	table->size = size;
-	table->table = malloc(sizeof(linked_list) * table->size);
+	table->table = malloc(sizeof(struct linkedlist*) * table->size);
 
 	/* set all table entries to NULL before use.  NULL specifies an empty bucket. */
-	bzero(table->table, table->size);
+	for (i = 0; i < table->size; i++)
+	{
+		table->table[i] = NULL;
+	}
 
 	table->hash = hash;
 
 	return table;
 }
 
-int __key_pair_equals(void* key1, void* key2)
+uint64_t djb2_hash(char* key)
 {
-	struct __key_pair* first;
-	struct __key_pair* second;
-
-	first = (struct __key_pair*) key1;
-	second = (struct __key_pair*) key2;
-
-	return strcmp(first->key, second->key);
-}
-
-uint64_t djb2_hash(uint8_t* key)
-{
-	uint8_t c;
+	char c;
 	uint64_t digest;
 
 	digest = 5381;
 
-	while(c = *key ++)
+	while((c = *key ++))
 	{
 		digest = ((digest << 5) + digest) + c;
 	}
@@ -102,7 +97,7 @@ uint64_t djb2_hash(uint8_t* key)
 	return digest;
 }
 
-int put_entry(struct table* table, uint8_t key, void* data)
+int put_entry(struct hashtable* table, char* key, void* data)
 {
 	uint64_t index;
 	struct __key_pair* entry;
@@ -111,18 +106,19 @@ int put_entry(struct table* table, uint8_t key, void* data)
 	{
 		return -1;
 	}
-	else if (data == NULL)
+	else if (data == NULL || data == NULL)
 	{
 		return -2;
 	}
 	
 	entry = __create_key_pair(key, data);
 
+	index = -1;
 	index = table->hash(key) % table->size;
 
 	if (table->table[index] == NULL)
 	{
-		table->table[index] = createlinkedlist();
+		table->table[index] = makeList();
 	}
 
 	append(table->table[index], entry);
@@ -130,18 +126,19 @@ int put_entry(struct table* table, uint8_t key, void* data)
 	return 0;
 }
 
-void* get_entry(struct table* table, uint8_t* key)
+void* get_entry(struct hashtable* table, char* key)
 {
+	int i;
+	struct linkedlist* list;
 	uint64_t index;
-	void* entry;
 
 	if (table == NULL)
 	{
-		return -1;
+		return NULL;
 	}
-	else if (data == NULL)
+	else if (key == NULL)
 	{
-		return -2;
+		return NULL;
 	}
 
 	index = table->hash(key) % table->size;
@@ -151,8 +148,19 @@ void* get_entry(struct table* table, uint8_t* key)
 		return NULL;
 	}
 
-	/* TODO create linkedlist function called get, takes list and equals */
-	entry = get(table->table[index], __equals_key_pair);
+	list = table->table[index];
 
-	return entry;
+	for (i = 0; i < getLength(list); i++)
+	{
+		struct __key_pair* pair;
+
+		pair = (struct __key_pair*) get(list, i);
+
+		if (pair != NULL && strcmp(key, pair->key) == 0)
+		{
+			return ((struct __key_pair*) get(list, i))->obj;
+		}
+	}
+
+	return NULL;
 }
