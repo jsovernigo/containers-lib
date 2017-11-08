@@ -162,7 +162,7 @@ int append(struct linkedlist* list, void* data)
 			current = current->next;
 		}
 
-		current = newLast;
+		current->next = newLast;
 	}
 
 	list->length ++;
@@ -236,7 +236,7 @@ int insert(struct linkedlist* list, void* data, int (*compare)(void*, void*), in
 	return 0;
 }
 
-int remove(struct linkedlist* list, void* data)
+int removeEntry(struct linkedlist* list, void* data)
 {
 	struct __node* current;
 

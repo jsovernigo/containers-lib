@@ -22,7 +22,7 @@ int append(struct linkedlist* list, void* data);
 
 int insert(struct linkedlist* list, void* data, int (*compare)(void*, void*), int index);
 
-int remove(struct linkedlist* list, void* data);
+int removeEntry(struct linkedlist* list, void* data);
 
 void* get(struct linkedlist* list, int index);
 
