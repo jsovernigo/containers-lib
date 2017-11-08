@@ -268,13 +268,13 @@ int remove_entry(struct linkedlist* list, void* data)
 		{
 			current->next = next->next;
 			free(next);
-			break;
+			return 0;
 		}
 
 		current = current->next;
 	}
 
-	return 0;
+	return -1;
 }
 
 void* get(struct linkedlist* list, int index)

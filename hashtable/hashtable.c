@@ -16,7 +16,7 @@ struct __key_pair
 struct hashtable
 {
 	size_t size;
-	struct linkedlist ** table;
+	struct linkedlist ** buckets;
 
 	uint64_t (*hash)(char* key);
 };
@@ -70,12 +70,12 @@ struct hashtable* create_hashtable(size_t size, uint64_t (*hash)(char* key))
 	}
 
 	table->size = size;
-	table->table = malloc(sizeof(struct linkedlist*) * table->size);
+	table->buckets = malloc(sizeof(struct linkedlist*) * table->size);
 
 	/* set all table entries to NULL before use.  NULL specifies an empty bucket. */
 	for (i = 0; i < table->size; i++)
 	{
-		table->table[i] = NULL;
+		table->buckets[i] = NULL;
 	}
 
 	table->hash = hash;
@@ -98,18 +98,18 @@ uint64_t djb2_hash(char* key)
 	return digest;
 }
 
-int put_entry(struct hashtable* table, char* key, void* data)
+void* put_entry(struct hashtable* table, char* key, void* data)
 {
 	uint64_t index;
 	struct __key_pair* entry;
 
 	if (table == NULL)
 	{
-		return -1;
+		return NULL;
 	}
 	else if (data == NULL || data == NULL)
 	{
-		return -2;
+		return NULL;
 	}
 	
 	entry = __create_key_pair(key, data);
@@ -117,14 +117,40 @@ int put_entry(struct hashtable* table, char* key, void* data)
 	index = -1;
 	index = table->hash(key) % table->size;
 
-	if (table->table[index] == NULL)
+	if (table->buckets[index] == NULL)
 	{
-		table->table[index] = make_list();
+		table->buckets[index] = make_list();
+	}
+	else
+	{
+		int i;
+
+		/* look through the bucket */
+		for (i = 0; i < get_length(table->buckets[index]); i++)
+		{
+			struct __key_pair* current_pair;
+
+			current_pair = get(table->buckets[index], i);
+
+			/* there is already an entry with this key. */
+			if (strcmp(current_pair->key, key) == 0)
+			{
+				void* old;
+
+				/* replace the current key */
+				old = current_pair->obj;
+				current_pair->obj = data;
+
+				return old;
+			}
+		}
+
 	}
 
-	append(table->table[index], entry);
+	/* if the above loop runs without finding anything, or it was an empty list */
+	append(table->buckets[index], entry);
 
-	return 0;
+	return NULL;
 }
 
 void* get_entry(struct hashtable* table, char* key)
@@ -144,12 +170,12 @@ void* get_entry(struct hashtable* table, char* key)
 
 	index = table->hash(key) % table->size;
 
-	if (table->table[index] == NULL)
+	if (table->buckets[index] == NULL)
 	{
 		return NULL;
 	}
 
-	list = table->table[index];
+	list = table->buckets[index];
 
 	for (i = 0; i < get_length(list); i++)
 	{
@@ -160,6 +186,48 @@ void* get_entry(struct hashtable* table, char* key)
 		if (pair != NULL && strcmp(key, pair->key) == 0)
 		{
 			return ((struct __key_pair*) get(list, i))->obj;
+		}
+	}
+
+	return NULL;
+}
+void* unput_entry(struct hashtable* table, char* key)
+{
+	int i;
+	struct linkedlist* list;
+	uint64_t index;
+
+	if (table == NULL)
+	{
+		return NULL;
+	}
+	else if (key == NULL)
+	{
+		return NULL;
+	}
+
+	index = table->hash(key) % table->size;
+
+	if (table->buckets[index] == NULL)
+	{
+		return NULL;
+	}
+
+	list = table->buckets[index];
+
+	/* loop through the bucket */
+	for (i = 0; i < get_length(list); i++)
+	{
+		struct __key_pair* current_pair;
+
+		current_pair = (struct __key_pair*) get(list, i);
+
+		if (current_pair != NULL && strcmp(key, current_pair->key) == 0)
+		{
+			int result;
+			result = remove_entry(list, current_pair);
+
+			return current_pair->obj;
 		}
 	}
 
