@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TESTS 100
+#define TESTS 1000000
 
 int* ip(int i)
 {
@@ -81,6 +81,8 @@ int main(int argc, char** argv)
 		free(val);
 		free(keys[i]);
 	}
+
+	printf("Expecting NULL (0x0): %p\n", get_entry(table, "NO KEY HERE"));
 
 	free(values);
 	free(keys);
