@@ -18,4 +18,6 @@ void* get_entry(struct hashtable* table, char* key);
 
 void* unput_entry(struct hashtable* table, char* key);
 
+char** get_keys(struct hashtable* table);
+
 #endif

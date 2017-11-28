@@ -289,6 +289,14 @@ void* unput_entry(struct hashtable* table, char* key)
 			void* data;
 			result = remove_entry(list, current_pair);
 
+			if (list->first == NULL)
+			{
+				destroy_list(list, &free);
+				
+				/* NULL is a condition that indicates an empty bucket. */
+				table->buckets[index] = NULL
+			}
+
 			/* FIXME this is kinda janky */
 			free(current_pair->key);
 			data = current_pair->obj;
@@ -299,4 +307,23 @@ void* unput_entry(struct hashtable* table, char* key)
 	}
 
 	return NULL;
+}
+
+char** get_keys(struct hashtable* table)
+{
+	size_t i;
+
+	if (table == NULL)
+	{
+		return NULL;
+	}
+
+	for (i = 0; i < table->size; i++)
+	{
+		/* this is a valid bucket, that has stuff in it */
+		if (table->buckets[i] != NULL)
+		{
+			
+		}
+	}
 }
