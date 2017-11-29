@@ -13,7 +13,7 @@ cpheaders: hashtable/hashtable.h linkedlist/linkedlist.h
 
 buildlibs: linkedlist.o hashtable.o
 ifeq ($(OS),Darwin)
-	$(CC) -dynamiclib -undefined suppress -flat_namespace linkedlist.o hashtable.o -o containers.dylib
+	$(CC) -dynamiclib -undefined suppress -flat_namespace linkedlist.o hashtable.o -o libcontainers.dylib
 else
 	$(CC) -shared -Wl,-soname,liblinkedlist.so -o liblinkedlist.so linkedlist.o
 	$(CC) -shared -Wl,-soname,libhashtable.so -o libhashtable.so hashtable.o
