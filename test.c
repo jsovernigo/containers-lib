@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TESTS 1000000
+#define TESTS 10000
 
 int* ip(int i)
 {

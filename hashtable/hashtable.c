@@ -285,9 +285,8 @@ void* unput_entry(struct hashtable* table, char* key)
 
 		if (current_pair != NULL && strcmp(key, current_pair->key) == 0)
 		{
-			int result;
 			void* data;
-			result = remove_entry(list, current_pair);
+			remove_entry(list, current_pair);
 
 			/* FIXME this is kinda janky */
 			free(current_pair->key);
