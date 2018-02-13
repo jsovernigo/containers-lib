@@ -1,3 +1,4 @@
+OS		=$(shell uname)
 CC		=gcc
 CFLAGS	=-g -Wall -Werror -std=c99 -fPIC
 
@@ -11,8 +12,13 @@ cpheaders: hashtable/hashtable.h linkedlist/linkedlist.h
 	cp linkedlist/linkedlist.h /usr/include/
 
 buildlibs: linkedlist.o hashtable.o
+ifeq ($(OS),Darwin)
+	$(CC) -dynamiclib -undefined suppress -flat_namespace linkedlist.o hashtable.o -o libcontainers.dylib
+else
 	$(CC) -shared -Wl,-soname,liblinkedlist.so -o liblinkedlist.so linkedlist.o
 	$(CC) -shared -Wl,-soname,libhashtable.so -o libhashtable.so hashtable.o
+endif
+
 
 hashtable.o: hashtable/hashtable.c hashtable/hashtable.h
 	$(CC) $(CFLAGS) hashtable/hashtable.c -c -I./hashtable -I./linkedlist
