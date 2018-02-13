@@ -339,8 +339,9 @@ char** get_keys(struct hashtable* table)
 				this_pair = get(table->buckets[i], j);
 				keys ++;
 				
+				key_list[keys] = this_pair->key;				
 			}
 		}
 	}
-	return NULL;
+	return key_list;
 }
