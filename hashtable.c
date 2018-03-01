@@ -16,6 +16,7 @@ struct __key_pair
 struct hashtable
 {
 	size_t size;
+	size_t nmem;
 	struct linkedlist ** buckets;
 
 	uint64_t (*hash)(char* key);
@@ -50,7 +51,7 @@ struct __key_pair* __create_key_pair(char* key, void* obj)
 	return new_pair;
 }
 
-struct hashtable* create_hashtable(size_t size, uint64_t (*hash)(char* key))
+struct hashtable* hashtable_make(size_t size, uint64_t (*hash)(char* key))
 {
 	int i;
 	struct hashtable* table;
@@ -71,6 +72,7 @@ struct hashtable* create_hashtable(size_t size, uint64_t (*hash)(char* key))
 	}
 
 	table->size = size;
+	table->nmem = 0;
 	table->buckets = malloc(sizeof(struct linkedlist*) * table->size);
 
 	/* set all table entries to NULL before use.  NULL specifies an empty bucket. */
@@ -103,7 +105,7 @@ void __destroy_key_pair(struct __key_pair* pair, void (*destroy)(void*))
 	return;
 }
 
-void destroy_hashtable(struct hashtable* table, void (*destroy)(void*))
+void hashtable_destroy(struct hashtable* table, void (*destroy)(void*))
 {
 	int i;
 
@@ -159,7 +161,7 @@ uint64_t djb2_hash(char* key)
 	return digest;
 }
 
-void* put_entry(struct hashtable* table, char* key, void* data)
+void* hashtable_put(struct hashtable* table, char* key, void* data)
 {
 	uint64_t index;
 	struct __key_pair* entry;
@@ -210,11 +212,12 @@ void* put_entry(struct hashtable* table, char* key, void* data)
 	/* if the above loop runs without finding anything, or it was an empty list */
 	entry = __create_key_pair(key, data);
 	append(table->buckets[index], entry);
+	table->nmem ++;
 
 	return NULL;
 }
 
-void* get_entry(struct hashtable* table, char* key)
+void* hashtable_get(struct hashtable* table, char* key)
 {
 	int i;
 	struct linkedlist* list;
@@ -252,7 +255,7 @@ void* get_entry(struct hashtable* table, char* key)
 
 	return NULL;
 }
-void* unput_entry(struct hashtable* table, char* key)
+void* hashtable_remove(struct hashtable* table, char* key)
 {
 	int i;
 	struct linkedlist* list;
@@ -300,6 +303,7 @@ void* unput_entry(struct hashtable* table, char* key)
 			free(current_pair->key);
 			data = current_pair->obj;
 			free(current_pair);
+			table->nmem --;
 
 			return data;
 		}
@@ -308,7 +312,7 @@ void* unput_entry(struct hashtable* table, char* key)
 	return NULL;
 }
 
-char** get_keys(struct hashtable* table)
+char** hashtable_keys(struct hashtable* table)
 {
 	size_t i;
 
@@ -322,7 +326,7 @@ char** get_keys(struct hashtable* table)
 	}
 
 	keys = 0;
-	key_list = malloc(sizeof(char*));
+	key_list = malloc(sizeof(char*) * (table->nmem + 1));
 	key_list[0] = NULL;
 
 	for (i = 0; i < table->size; i++)
@@ -337,11 +341,11 @@ char** get_keys(struct hashtable* table)
 				struct __key_pair* this_pair;
 
 				this_pair = get(table->buckets[i], j);
-				keys ++;
-				
 				key_list[keys] = this_pair->key;				
+				keys ++;
 			}
 		}
 	}
+	key_list[table->nmem] = NULL;
 	return key_list;
 }

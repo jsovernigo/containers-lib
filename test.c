@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 
 	struct hashtable* table;
 
-	table = create_hashtable(TESTS*2, &djb2_hash);
+	table = hastable_make(TESTS*2, &djb2_hash);
 
 	values = malloc(sizeof(int*) * TESTS);
 	keys = malloc(sizeof(char*) * TESTS);
@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 		strcpy(keys[i], keyi);
 
 		printf("Putting %s, %d... ", keys[i], *((int*)values[i]));
-		put_entry(table, keys[i], values[i]);
+		hastable_get(table, keys[i], values[i]);
 		puts("done");
 	}
 
@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 	{
 		int* val;
 
-		val = ((int*) get_entry(table, keys[i]));
+		val = ((int*) hashtable_get(table, keys[i]));
 		printf("Getting %s, %d... ", keys[i], *((int*)values[i]));
 		if (val != NULL)
 		{
@@ -65,7 +65,7 @@ int main(int argc, char** argv)
 	{
 		int* val;
 
-		val = ((int*) unput_entry(table, keys[i]));
+		val = ((int*) hashtable_remove(table, keys[i]));
 		printf("Unputting %s, %d... ", keys[i], *((int*)values[i]));
 
 		if (val != NULL)
@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 	free(values);
 	free(keys);
 
-	destroy_hashtable(table, &free);
+	hashtable_destroy(table, &free);
 
 	return 0;
 }

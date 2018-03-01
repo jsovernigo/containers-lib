@@ -2,14 +2,15 @@ OS		=$(shell uname)
 CC		=gcc
 CFLAGS	=-g -Wall -Werror -std=c99 -fPIC
 
-all: buildlibs cpheaders
+all: buildlibs
 
 test: linkedlist.o hashtable.o
-	$(CC) $(CFLAGS) hashtable.o linkedlist.o test.c -o testHash -I./linkedlist -I./hashtable
+	$(CC) $(CFLAGS) hashtable.o linkedlist.o test.c -o testHash -I.
 
-cpheaders: hashtable/hashtable.h linkedlist/linkedlist.h
-	cp hashtable/hashtable.h /usr/include/
-	cp linkedlist/linkedlist.h /usr/include/
+install: cpheaders buildlibs
+cpheaders: hashtable.h linkedlist.h
+	cp hashtable.h /usr/include/
+	cp linkedlist.h /usr/include/
 
 buildlibs: linkedlist.o hashtable.o
 ifeq ($(OS),Darwin)
@@ -20,8 +21,11 @@ else
 endif
 
 
-hashtable.o: hashtable/hashtable.c hashtable/hashtable.h
-	$(CC) $(CFLAGS) hashtable/hashtable.c -c -I./hashtable -I./linkedlist
+hashtable.o: hashtable.c hashtable.h
+	$(CC) $(CFLAGS) hashtable.c -c -I.
 
-linkedlist.o: linkedlist/linkedlist.c linkedlist/linkedlist.h
-	$(CC) $(CFLAGS) linkedlist/linkedlist.c -c -I./linkedlist
+linkedlist.o: linkedlist.c linkedlist.h
+	$(CC) $(CFLAGS) linkedlist.c -c -I.
+
+clean:
+	rm linkedlist.o vector.o hashtable.o testhash

@@ -6,18 +6,18 @@
 
 struct hashtable;
 
-struct hashtable* create_hashtable(size_t size, uint64_t (*hash)(char* key));
+struct hashtable* hashtable_make(size_t size, uint64_t (*hash)(char* key));
 
-void destroy_hashtable(struct hashtable* table, void (*destroy)(void*));
+void hashtable_destroy(struct hashtable* table, void (*destroy)(void*));
 
 uint64_t djb2_hash(char* key);
 
-void* put_entry(struct hashtable* table, char* key, void* data);
+void* hashtable_put(struct hashtable* table, char* key, void* data);
 
-void* get_entry(struct hashtable* table, char* key);
+void* hashtable_get(struct hashtable* table, char* key);
 
-void* unput_entry(struct hashtable* table, char* key);
+void* hashtable_remove(struct hashtable* table, char* key);
 
-char** get_keys(struct hashtable* table);
+char** hashtable_keys(struct hashtable* table);
 
 #endif
